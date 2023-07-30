@@ -1,15 +1,16 @@
 const Koa = require('koa')
 const Router = require('@koa/router')
-const { bodyParser } = require("@koa/bodyparser")
+const { bodyParser } = require('@koa/bodyparser')
 const jwt = require('jsonwebtoken')
 const { SECRET, PORT } = require('./config')
 const USERS = require('./users')
 const authenticate = require('./middlewares/authenticate')
 const authorize = require('./middlewares/authorize')
+const { initMessageStats, saveMessageStats, getMessageStats, savePermanentMessageStats } = require('./repositories/messageStats')
 
-const messageStats = {
-	numberOfCalls: 0,
-	lastMessage: null
+const teardown = () => {
+	savePermanentMessageStats()
+	process.exit()
 }
 
 const app = new Koa()
@@ -28,21 +29,25 @@ router.post('/login', (ctx) => {
 })
 
 router.post('/message', authenticate, (ctx) => {
-	messageStats.lastMessage = ctx.request.body
-	++messageStats.numberOfCalls
+	saveMessageStats(ctx.request.body)
 
 	ctx.status = 200;
 	ctx.body = 'OK'
 })
 
 router.get('/stats', authenticate, authorize('admin'), (ctx) => {
-	ctx.body = messageStats
+	ctx.body = getMessageStats()
 })
 
 app.use(bodyParser())
 app.use(router.routes())
 app.use(router.allowedMethods())
 
+initMessageStats()
+
 app.listen(PORT, () => {
 	console.log(`Server started on http://localhost:${PORT}`)
 })
+
+process.on('SIGINT', teardown)
+process.on('uncaughtException', teardown)
