@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -22,5 +23,8 @@
   "homepage": "https://github.com/VladislavStechr/koa_server_test#readme",
   "dependencies": {
     "koa": "^2.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
