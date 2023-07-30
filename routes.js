@@ -20,6 +20,11 @@ router.post('/login', (ctx) => {
 	ctx.body = { token }
 })
 
+router.get('/logout', (ctx) => {
+	ctx.status = 200;
+	ctx.body = 'logged out'
+})
+
 router.post('/message', authenticate, (ctx) => {
 	saveMessageStats(ctx.request.body)
 
