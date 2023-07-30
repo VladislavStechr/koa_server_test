@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "engines": {"node": "v18.10.0"},
+  "engines": {
+    "node": "v18.10.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -16,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/VladislavStechr/koa_server_test/issues"
   },
-  "homepage": "https://github.com/VladislavStechr/koa_server_test#readme"
+  "homepage": "https://github.com/VladislavStechr/koa_server_test#readme",
+  "dependencies": {
+    "koa": "^2.14.2"
+  }
 }
