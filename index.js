@@ -21,5 +21,6 @@ app.listen(PORT, () => {
 	console.log(`Server started on http://localhost:${PORT}`)
 })
 
+// TODO(prod) add error handling, logging
 process.on('SIGINT', teardown)
 process.on('uncaughtException', teardown)

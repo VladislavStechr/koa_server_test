@@ -13,6 +13,7 @@ router.post('/login', (ctx) => {
 	const user = USERS.find((user) => user.username === username && user.password === password)
 	if(!user) {
 		ctx.status = 401
+		// TODO(prod) better error handling mechanism + logging
 		ctx.body = { error: 'Username or password invalid' }
 		return
 	}
@@ -32,6 +33,7 @@ router.post('/message', authenticate, (ctx) => {
 	ctx.body = 'OK'
 })
 
+// TODO(prod) use constants for roles
 router.get('/stats', authenticate, authorize('admin'), (ctx) => {
 	ctx.body = getMessageStats()
 })

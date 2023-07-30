@@ -1,3 +1,4 @@
+// TODO(prod) add error handling
 const fs = require('fs')
 const path = require('path')
 

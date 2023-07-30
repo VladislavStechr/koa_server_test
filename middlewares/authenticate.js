@@ -9,6 +9,7 @@ const authenticate = (ctx, next) => {
 		return
 	}
 
+	// TODO(prod) add error handling
 	const userLoggedIn = jwt.verify(token, SECRET)
 	ctx.state.userLoggedIn = userLoggedIn
 	next()
