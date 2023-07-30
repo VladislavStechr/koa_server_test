@@ -33,7 +33,7 @@ const authenticate = (ctx, next) => {
 
 const authorization = (role) => (ctx, next) => {
 	const userLoggedInRole = ctx.state.userLoggedIn.role
-	if(userLoggedInRole !== role && userLoggedInRole !== 'admin') {
+	if(userLoggedInRole !== role) {
 		ctx.status = 403
 		return
 	}
@@ -52,7 +52,7 @@ router.post('/login', (ctx) => {
 	ctx.body = { token }
 })
 
-router.post('/message', authenticate, authorization('user'), (ctx) => {
+router.post('/message', authenticate, (ctx) => {
 	messageStats.latestMessage = ctx.request.body
 	++messageStats.count
 
