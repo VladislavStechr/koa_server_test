@@ -1,7 +1,14 @@
-const PORT = 3000
 const Koa = require('koa')
 const Router = require('@koa/router')
 const { bodyParser } = require("@koa/bodyparser")
+const jwt = require('jsonwebtoken')
+
+const PORT = 3000
+const SECRET = 'secret'
+const USERS = [
+	{username: 'admin', password: 'secret'},
+	{username: 'user', password: 'secret'},
+]
 
 const messageStats = {
 	count: 0,
@@ -11,7 +18,32 @@ const messageStats = {
 const app = new Koa()
 const router = new Router()
 
-router.post('/message', (ctx) => {
+const authenticate = (ctx, next) => {
+	const token = ctx.request.headers.authorization
+
+	if(!token) {
+		ctx.status = 401
+		return
+	}
+
+	const userLoggedIn = jwt.verify(token, SECRET)
+	ctx.state.userLoggedIn = userLoggedIn
+	next()
+}
+
+router.post('/login', (ctx) => {
+	const {username, password} = ctx.request.body
+	const user = USERS.find((user) => user.username === username && user.password === password)
+	if(!user) {
+		ctx.status = 401
+		ctx.body = { error: 'Username or password invalid' }
+		return
+	}
+	const token = jwt.sign({username, password}, SECRET)
+	ctx.body = { token }
+})
+
+router.post('/message', authenticate, (ctx) => {
 	messageStats.latestMessage = ctx.request.body
 	++messageStats.count
 
@@ -19,7 +51,7 @@ router.post('/message', (ctx) => {
 	ctx.body = 'OK'
 })
 
-router.get('/stats', (ctx) => {
+router.get('/stats', authenticate, (ctx) => {
 	ctx.body = messageStats
 })
 
