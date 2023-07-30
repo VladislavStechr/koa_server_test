@@ -2,43 +2,18 @@ const Koa = require('koa')
 const Router = require('@koa/router')
 const { bodyParser } = require("@koa/bodyparser")
 const jwt = require('jsonwebtoken')
-
-const PORT = 3000
-const SECRET = 'secret'
-const USERS = [
-	{username: 'admin', role: 'admin', password: 'secret'},
-	{username: 'user', role: 'user', password: 'secret'},
-]
+const { SECRET, PORT } = require('./config')
+const USERS = require('./users')
+const authenticate = require('./middlewares/authenticate')
+const authorize = require('./middlewares/authorize')
 
 const messageStats = {
-	count: 0,
-	latestMessage: null
+	numberOfCalls: 0,
+	lastMessage: null
 }
 
 const app = new Koa()
 const router = new Router()
-
-const authenticate = (ctx, next) => {
-	const token = ctx.request.headers.authorization
-
-	if(!token) {
-		ctx.status = 401
-		return
-	}
-
-	const userLoggedIn = jwt.verify(token, SECRET)
-	ctx.state.userLoggedIn = userLoggedIn
-	next()
-}
-
-const authorization = (role) => (ctx, next) => {
-	const userLoggedInRole = ctx.state.userLoggedIn.role
-	if(userLoggedInRole !== role) {
-		ctx.status = 403
-		return
-	}
-	next()
-}
 
 router.post('/login', (ctx) => {
 	const {username, password} = ctx.request.body
@@ -53,14 +28,14 @@ router.post('/login', (ctx) => {
 })
 
 router.post('/message', authenticate, (ctx) => {
-	messageStats.latestMessage = ctx.request.body
-	++messageStats.count
+	messageStats.lastMessage = ctx.request.body
+	++messageStats.numberOfCalls
 
 	ctx.status = 200;
 	ctx.body = 'OK'
 })
 
-router.get('/stats', authenticate, authorization('admin'), (ctx) => {
+router.get('/stats', authenticate, authorize('admin'), (ctx) => {
 	ctx.body = messageStats
 })
 
