@@ -6,8 +6,8 @@ const jwt = require('jsonwebtoken')
 const PORT = 3000
 const SECRET = 'secret'
 const USERS = [
-	{username: 'admin', password: 'secret'},
-	{username: 'user', password: 'secret'},
+	{username: 'admin', role: 'admin', password: 'secret'},
+	{username: 'user', role: 'user', password: 'secret'},
 ]
 
 const messageStats = {
@@ -31,6 +31,15 @@ const authenticate = (ctx, next) => {
 	next()
 }
 
+const authorization = (role) => (ctx, next) => {
+	const userLoggedInRole = ctx.state.userLoggedIn.role
+	if(userLoggedInRole !== role && userLoggedInRole !== 'admin') {
+		ctx.status = 403
+		return
+	}
+	next()
+}
+
 router.post('/login', (ctx) => {
 	const {username, password} = ctx.request.body
 	const user = USERS.find((user) => user.username === username && user.password === password)
@@ -39,11 +48,11 @@ router.post('/login', (ctx) => {
 		ctx.body = { error: 'Username or password invalid' }
 		return
 	}
-	const token = jwt.sign({username, password}, SECRET)
+	const token = jwt.sign({...user}, SECRET, { expiresIn: '15m' })
 	ctx.body = { token }
 })
 
-router.post('/message', authenticate, (ctx) => {
+router.post('/message', authenticate, authorization('user'), (ctx) => {
 	messageStats.latestMessage = ctx.request.body
 	++messageStats.count
 
@@ -51,7 +60,7 @@ router.post('/message', authenticate, (ctx) => {
 	ctx.body = 'OK'
 })
 
-router.get('/stats', authenticate, (ctx) => {
+router.get('/stats', authenticate, authorization('admin'), (ctx) => {
 	ctx.body = messageStats
 })
 
